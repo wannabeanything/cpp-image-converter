@@ -30,9 +30,10 @@ PACKED_STRUCT_BEGIN BitmapInfoHeader {
     uint32_t biClrUsed;
     uint32_t biClrImportant;
 } PACKED_STRUCT_END
-
+const int FOUR = 4;
+const int THREE = 3;
 static int GetBMPStride(int w) {
-    return 4 * ((w * 3 + 3) / 4);
+    return FOUR * ((w * THREE + THREE) / FOUR);
 }
 
 bool SaveBMP(const Path& file, const Image& image) {
