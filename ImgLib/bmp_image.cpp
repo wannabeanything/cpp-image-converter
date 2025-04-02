@@ -100,8 +100,14 @@ Image LoadBMP(const Path& file) {
     BitmapFileHeader fileHeader = {};
     BitmapInfoHeader infoHeader = {};
 
-    ifs.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
-    ifs.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
+    //ifs.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+    if(!ifs.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader))){
+        return {};
+    }
+    if(!ifs.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader))){
+        return {};
+    }
+    //ifs.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
 
     // Validate headers
     if (fileHeader.bfType != 0x4D42 || infoHeader.biBitCount != 24 || infoHeader.biCompression != 0) {
