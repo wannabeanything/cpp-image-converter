@@ -30,10 +30,10 @@ PACKED_STRUCT_BEGIN BitmapInfoHeader {
     uint32_t biClrUsed;
     uint32_t biClrImportant;
 } PACKED_STRUCT_END
-const int FOUR = 4;
-const int THREE = 3;
+const int COLORS_QUANTITY = 4;
+const int PADDING = 3;
 static int GetBMPStride(int w) {
-    return FOUR * ((w * THREE + THREE) / FOUR);
+    return COLORS_QUANTITY * ((w * PADDING + PADDING) / COLORS_QUANTITY);
 }
 
 bool SaveBMP(const Path& file, const Image& image) {
@@ -101,22 +101,22 @@ Image LoadBMP(const Path& file) {
     BitmapFileHeader fileHeader = {};
     BitmapInfoHeader infoHeader = {};
 
-    //ifs.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+    
     if(!ifs.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader))){
         return {};
     }
     if(!ifs.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader))){
         return {};
     }
-    //ifs.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
+    
 
-    // Validate headers
+    
     if (fileHeader.bfType != 0x4D42 || infoHeader.biBitCount != 24 || infoHeader.biCompression != 0) {
         return {};
     }
 
     const int width = infoHeader.biWidth;
-    const int height = abs(infoHeader.biHeight); // Handle negative height
+    const int height = abs(infoHeader.biHeight);
     const int stride = GetBMPStride(width);
 
     // Create image
@@ -125,14 +125,17 @@ Image LoadBMP(const Path& file) {
     // Read pixel data
     vector<char> rowBuffer(stride);
     for (int y = 0; y < height; ++y) {
-        ifs.read(rowBuffer.data(), rowBuffer.size());
+        if(!ifs.read(rowBuffer.data(), rowBuffer.size())){
+            return {};
+        }
+        
 
-        Color* line = image.GetLine(height - 1 - y); // Reverse row order
+        Color* line = image.GetLine(height - 1 - y); 
         for (int x = 0; x < width; ++x) {
-            line[x].b = static_cast<std::byte>(rowBuffer[x * 3 + 0]); // Blue
-            line[x].g = static_cast<std::byte>(rowBuffer[x * 3 + 1]); // Green
-            line[x].r = static_cast<std::byte>(rowBuffer[x * 3 + 2]); // Red
-            line[x].a = std::byte{255}; // Fully opaque alpha channel
+            line[x].b = static_cast<std::byte>(rowBuffer[x * 3 + 0]);
+            line[x].g = static_cast<std::byte>(rowBuffer[x * 3 + 1]);
+            line[x].r = static_cast<std::byte>(rowBuffer[x * 3 + 2]); 
+            line[x].a = std::byte{255}; 
         }
     }
 
